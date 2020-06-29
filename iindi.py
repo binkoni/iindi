@@ -34,10 +34,15 @@ class IIndi(QAxWidget):
         self.ReceiveSysMsg.connect(self.recv_msg)
     def set_query_name(self, query):
         self.dynamicCall('SetQueryName(QString)', query)
+    def request_data(self):
+        return self.dynamicCall('RequestData()')
+
     def req_stock_mst(self):
         self.set_query_name('stock_mst')
-        req_id = self.dynamicCall('RequestData()')
+        req_id = self.request_data()
         self.req_map[req_id] = 'stock_mst'
+        with cv:
+            cv.wait()
         return req_id
 
     def recv_stock_mst(self):
@@ -73,8 +78,6 @@ app = flask.Flask(__name__)
 @app.route('/')
 def hello():
     req_id = iindi_window.iindi.req_stock_mst()
-    with cv:
-        cv.wait()
     res = iindi_window.iindi.res_map[req_id]
     del iindi_window.iindi.res_map[req_id]
     return res
