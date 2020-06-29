@@ -9,10 +9,12 @@ from PyQt5.QtWidgets import QPushButton
 from pandas import Series, DataFrame
 import pandas as pd
 import numpy as np
-import flask
 import threading
 import json
 import ctypes, sys
+
+#import flask
+import cherrypy
 
 def is_admin():
     try:
@@ -74,13 +76,15 @@ class IIndiWindow(QMainWindow):
         self.iindi = IIndi()
         self.setWindowTitle("IIndi")
 
-app = flask.Flask(__name__)
-@app.route('/')
-def hello():
-    req_id = iindi_window.iindi.req_stock_mst()
-    res = iindi_window.iindi.res_map[req_id]
-    del iindi_window.iindi.res_map[req_id]
-    return res
+#app = flask.Flask(__name__)
+#@app.route('/')
+class Router:
+    @cherrypy.expose
+    def index(self):
+        req_id = iindi_window.iindi.req_stock_mst()
+        res = iindi_window.iindi.res_map[req_id]
+        del iindi_window.iindi.res_map[req_id]
+        return res
 
 cv = threading.Condition()
 
@@ -92,5 +96,5 @@ if __name__ == "__main__":
     qt_app = QApplication(sys.argv)
     iindi_window = IIndiWindow()
     iindi_window.show()
-    threading.Thread(target=app.run, kwargs={'debug': False}, daemon=True).start()
+    threading.Thread(target=cherrypy.quickstart, args=(Router(),), daemon=True).start()
     qt_app.exec()
