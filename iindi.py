@@ -35,9 +35,13 @@ class IIndi(QAxWidget):
         self.ReceiveData.connect(self.recv_data)
         self.ReceiveSysMsg.connect(self.recv_msg)
     def set_query_name(self, query):
-        self.dynamicCall('SetQueryName(QString)', query)
+        return self.dynamicCall('SetQueryName(QString)', query)
     def request_data(self):
         return self.dynamicCall('RequestData()')
+    def get_multi_row_count(self):
+        return self.dynamicCall('GetMultiRowCount()')
+    def set_single_data(self, index, string):
+        return self.dynamicCall('SetSingleData(int, QString)', index, string)
 
     def req_stock_mst(self):
         self.set_query_name('stock_mst')
